@@ -4,10 +4,14 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-js.css';
 
+
 import './bpmn-editor.css';
+import 'bpmn-js-token-simulation/assets/css/bpmn-js-token-simulation.css';
+
 
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 
+import TokenSimulationModule from 'bpmn-js-token-simulation';
 import BpmnColorPickerModule from 'bpmn-js-color-picker';
 
 import { handleMacOsKeyboard } from './utils/macos-keyboard';
@@ -22,7 +26,8 @@ handleMacOsKeyboard();
 const modeler = new BpmnModeler({
   container: '#canvas',
   additionalModules: [
-    BpmnColorPickerModule
+    BpmnColorPickerModule,
+    TokenSimulationModule
   ]
 });
 
