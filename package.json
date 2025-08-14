@@ -4,10 +4,10 @@
   "description": "Edit BPMN 2.0 files, extended toolset",
   "license": "MIT",
   "version": "0.22.2",
-  "publisher": "bpmn-io",
+  "publisher": "ArchmagosTechnicus",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bpmn-io/vs-code-bpmn-io"
+    "url": "https://github.com/ArchmagosTechnicus/vs-code-bpmn-io"
   },
   "engines": {
     "vscode": "^1.79.2",
