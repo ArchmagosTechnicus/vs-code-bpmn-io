@@ -13,6 +13,9 @@ import BpmnViewer from 'bpmn-js/lib/Viewer';
 import { diff } from 'bpmn-js-differ';
 import BpmnModdle from 'bpmn-moddle';
 
+import MoveCanvasModule from 'diagram-js/lib/navigation/movecanvas';
+import ZoomScrollModule from 'diagram-js/lib/navigation/zoomscroll';
+
 import TokenSimulationModule from 'bpmn-js-token-simulation';
 import BpmnColorPickerModule from 'bpmn-js-color-picker';
 
@@ -38,11 +41,19 @@ const modeler = new BpmnModeler({
 });
 
 const leftViewer = new BpmnViewer({
-  container: '#canvas'
+  container: '#canvas',
+  additionalModules: [
+    MoveCanvasModule,
+    ZoomScrollModule
+  ]
 });
 
 const rightViewer = new BpmnViewer({
-  container: '#canvas2'
+  container: '#canvas2',
+  additionalModules: [
+    MoveCanvasModule,
+    ZoomScrollModule
+  ]
 });
 
 // Function to switch between modeler and viewer
@@ -167,6 +178,9 @@ document.getElementById('toggle-diff').addEventListener('click', async () => {
     // Request commit list when entering diff mode
     vscode.postMessage({ type: 'requestCommitList' });
     
+    // Start synchronizing viewers
+    startSync();
+    
     if (!comparisonContent) {
       vscode.postMessage({ type: 'requestComparisonContent' });
     } else {
@@ -174,6 +188,9 @@ document.getElementById('toggle-diff').addEventListener('click', async () => {
       highlightDifferences();
     }
   } else {
+    // Stop synchronizing viewers
+    stopSync();
+
     // Switch back to modeler mode for left panel
     await switchLeftPanel(false);
     canvas2.classList.add('hidden');
@@ -266,6 +283,36 @@ async function highlightDifferences() {
   addMarkers(rightViewer, changes._changed, HighlightType.CHANGED);   // Show modified elements in orange
   addMarkers(rightViewer, changes._layoutChanged, HighlightType.LAYOUT); // Show layout changes in blue
 }
+
+// Synchronize pan and zoom between the two viewers
+let isSyncing = false;
+
+function syncViewers(sourceViewer, targetViewer) {
+  return (event) => {
+    if (isSyncing) {
+      return;
+    }
+
+    isSyncing = true;
+    const viewbox = event.viewbox;
+    targetViewer.get('canvas').viewbox(viewbox);
+    isSyncing = false;
+  };
+}
+
+const syncLeftToRight = syncViewers(leftViewer, rightViewer);
+const syncRightToLeft = syncViewers(rightViewer, leftViewer);
+
+function startSync() {
+  leftViewer.on('canvas.viewbox.changed', syncLeftToRight);
+  rightViewer.on('canvas.viewbox.changed', syncRightToLeft);
+}
+
+function stopSync() {
+  leftViewer.off('canvas.viewbox.changed', syncLeftToRight);
+  rightViewer.off('canvas.viewbox.changed', syncRightToLeft);
+}
+
 
 
 // handle messages from the extension
