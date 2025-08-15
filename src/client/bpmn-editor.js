@@ -94,17 +94,74 @@ modeler.on('canvas.focus.changed', (event) => {
   });
 });
 
+// Handle the resizable split view
+function initResizableSplitView() {
+  const diffContainer = document.querySelector('.diff-container');
+  const divider = document.querySelector('.divider');
+  let isResizing = false;
+  let startX, startWidth;
+
+  divider.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    startX = e.pageX;
+    startWidth = document.getElementById('canvas').offsetWidth;
+    
+    diffContainer.classList.add('resizing');
+    divider.classList.add('dragging');
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+
+    const canvas = document.getElementById('canvas');
+    const canvas2 = document.getElementById('canvas2');
+    const containerWidth = diffContainer.offsetWidth;
+    const delta = e.pageX - startX;
+    
+    // Calculate new width as a percentage
+    const newWidth = ((startWidth + delta) / containerWidth * 100);
+    
+    // Limit the minimum and maximum sizes (10% - 90%)
+    if (newWidth >= 10 && newWidth <= 90) {
+      canvas.style.flex = 'none';
+      canvas.style.width = `${newWidth}%`;
+      canvas2.style.flex = 'none';
+      canvas2.style.width = `${100 - newWidth}%`;
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isResizing) {
+      isResizing = false;
+      diffContainer.classList.remove('resizing');
+      divider.classList.remove('dragging');
+      
+      // Trigger resize event for bpmn-js to update its viewport
+      window.dispatchEvent(new Event('resize'));
+    }
+  });
+}
+
 document.getElementById('toggle-diff').addEventListener('click', async () => {
   isDiffMode = !isDiffMode;
   
   const canvas2 = document.getElementById('canvas2');
+  const divider = document.querySelector('.divider');
   const commitSelector = document.getElementById('commit-selector');
   
   if (isDiffMode) {
     // Switch to viewer mode for left panel
     await switchLeftPanel(true);
     
+    // Reset flex layout
+    const canvas = document.getElementById('canvas');
+    canvas.style.flex = '1';
+    canvas.style.width = '';
+    canvas2.style.flex = '1';
+    canvas2.style.width = '';
+    
     canvas2.classList.remove('hidden');
+    divider.classList.remove('hidden');
     commitSelector.classList.remove('hidden');
     
     // Request commit list when entering diff mode
@@ -120,6 +177,7 @@ document.getElementById('toggle-diff').addEventListener('click', async () => {
     // Switch back to modeler mode for left panel
     await switchLeftPanel(false);
     canvas2.classList.add('hidden');
+    divider.classList.add('hidden');
     commitSelector.classList.add('hidden');
   }
 });
@@ -286,6 +344,9 @@ window.addEventListener('message', async (event) => {
     return;
   }
 });
+
+// Initialize the resizable split view
+initResizableSplitView();
 
 // signal to VS Code that the webview is initialized
 vscode.postMessage({ type: 'ready' });

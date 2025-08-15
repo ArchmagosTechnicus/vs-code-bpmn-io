@@ -505,6 +505,7 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
         </div>
         <div class="diff-container">
           <div class="viewer" id="canvas"></div>
+          <div class="divider hidden"></div>
           <div class="viewer hidden" id="canvas2"></div>
         </div>
 
