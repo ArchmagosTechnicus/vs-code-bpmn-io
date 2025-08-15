@@ -8,6 +8,100 @@ body {
   background: white;
 }
 
+.toolbar {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 3px;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+}
+
+#commit-selector-container {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+}
+
+#commit-selector-container.hidden {
+  display: none;
+}
+
+#commit-selector-container label {
+  margin-right: 5px;
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+}
+
+.toolbar button {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.toolbar button:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.toolbar select {
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+  border: 1px solid var(--vscode-dropdown-border);
+  padding: 4px 8px;
+  border-radius: 2px;
+}
+
+.toolbar select:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+}
+
+.diff-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.diff-container .viewer {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  min-width: 100px;
+}
+
+.diff-container .viewer.hidden {
+  display: none;
+}
+
+.diff-container .divider {
+  width: 4px;
+  background: var(--vscode-panel-border);
+  cursor: col-resize;
+  margin: 0 -2px;
+  z-index: 100;
+}
+
+.diff-container .divider:hover,
+.diff-container .divider.dragging {
+  background: var(--vscode-focusBorder);
+}
+
+.diff-container .divider.hidden {
+  display: none;
+}
+
+/* Prevent text selection while resizing */
+.diff-container.resizing {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 #canvas {
   overflow: hidden;
   width: 100%;
@@ -29,3 +123,23 @@ body {
   grid: auto-flow / 1fr 1fr 1fr;
 }
 
+/* Diff view highlighting */
+.highlight-removed .djs-visual > * {
+  fill: rgba(255, 0, 0, 0.2) !important;
+  stroke: rgb(255, 0, 0) !important;
+}
+
+.highlight-added .djs-visual > * {
+  fill: rgba(0, 255, 0, 0.2) !important;
+  stroke: rgb(0, 255, 0) !important;
+}
+
+.highlight-changed .djs-visual > * {
+  fill: rgba(255, 165, 0, 0.2) !important;
+  stroke: rgb(255, 165, 0) !important;
+}
+
+.highlight-layout .djs-visual > * {
+  fill: rgba(0, 0, 255, 0.2) !important;
+  stroke: rgb(0, 0, 255) !important;
+}

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { Disposable, disposeAll } from './dispose';
-import { getNonce } from './util';
+import { Disposable, disposeAll } from './dispose.js';
+import { getNonce } from './util.js';
 
 /**
  * Define the type of edits used in paw draw files.
@@ -497,7 +497,20 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
         <title>BPMN Editor</title>
       </head>
       <body>
-        <div id="canvas"></div>
+        <div class="toolbar">
+          <button id="toggle-diff">Toggle Diff View</button>
+          <div id="commit-selector-container" class="hidden">
+            <label for="commit-selector">Compare with:</label>
+            <select id="commit-selector">
+              <option value="HEAD">Current Commit</option>
+            </select>
+          </div>
+        </div>
+        <div class="diff-container">
+          <div class="viewer" id="canvas"></div>
+          <div class="divider hidden"></div>
+          <div class="viewer hidden" id="canvas2"></div>
+        </div>
 
         <script nonce="${nonce}" src="${scriptUri}"></script>
       </body>
@@ -518,13 +531,12 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
     panel.webview.postMessage({ type, body });
   }
 
-  private onMessage(document: BpmnDocument, message: any) {
+  private async onMessage(document: BpmnDocument, message: any) {
     switch (message.type) {
     case 'change':
       return document.makeEdit(message as BpmnEdit);
 
     case 'import':
-
       if (message.error) {
         this.log.appendLine(`${document.uri.fsPath} - ${message.error}`);
       }
@@ -548,6 +560,117 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
       vscode.commands.executeCommand('setContext', 'bpmn-io.bpmnEditor.canvasFocused', message.value);
       return;
 
+    case 'requestCommitList':
+      try {
+        const cp = require('child_process');
+        const path = require('path');
+        const filePath = document.uri.fsPath;
+        const fileDir = path.dirname(filePath);
+
+        // First, find the git root directory
+        const gitRoot = await new Promise<string>((resolve, reject) => {
+          cp.exec('git rev-parse --show-toplevel', {
+            cwd: fileDir
+          }, (err: any, stdout: string, stderr: string) => {
+            if (err) {
+              reject(new Error(`Failed to find git root: ${stderr}`));
+              return;
+            }
+            resolve(stdout.trim());
+          });
+        });
+
+        // Get list of commits that modified this file
+        const commits = await new Promise<Array<{hash: string, date: string}>>((resolve, reject) => {
+          cp.exec(`git log --pretty=format:"%h|%ad" --date=format:"%Y-%m-%d %H:%M" -- "${path.relative(gitRoot, filePath)}"`, {
+            cwd: gitRoot
+          }, (err: any, stdout: string, stderr: string) => {
+            if (err) {
+              reject(new Error(`Git log failed: ${stderr}`));
+              return;
+            }
+            const commits = stdout.split('\n')
+              .filter(line => line.trim())
+              .map(line => {
+                const [hash, date] = line.split('|');
+                return { hash, date };
+              });
+            resolve(commits);
+          });
+        });
+
+        // Check if there are unstaged changes
+        const hasChanges = await new Promise<boolean>((resolve, reject) => {
+          cp.exec(`git diff --quiet "${path.relative(gitRoot, filePath)}"`, {
+            cwd: gitRoot
+          }, (err: any) => {
+            resolve(!!err); // If there's an error, it means there are changes
+          });
+        });
+
+        for (const webviewPanel of this.webviews.get(document.uri)) {
+          this.postMessage(webviewPanel, 'updateCommitList', { 
+            commits,
+            hasChanges
+          });
+        }
+      } catch (error) {
+        this.log.appendLine(`Error getting commit list: ${error}`);
+        this.log.show(true);
+      }
+      return;
+
+    case 'requestComparisonContent':
+      try {
+        const cp = require('child_process');
+        const path = require('path');
+        const filePath = document.uri.fsPath;
+        const fileDir = path.dirname(filePath);
+
+        // Get commit from message or default to previous
+        const requestedCommit = message.commit || 'HEAD~1';
+
+        // First, find the git root directory
+        const gitRoot = await new Promise<string>((resolve, reject) => {
+          cp.exec('git rev-parse --show-toplevel', {
+            cwd: fileDir
+          }, (err: any, stdout: string, stderr: string) => {
+            if (err) {
+              reject(new Error(`Failed to find git root: ${stderr}`));
+              return;
+            }
+            resolve(stdout.trim());
+          });
+        });
+
+        // Get the file path relative to git root
+        const relativePath = path.relative(gitRoot, filePath);
+        
+        // Run git show to get the requested version
+        const result = await new Promise<string>((resolve, reject) => {
+          cp.exec(`git show ${requestedCommit}:${relativePath}`, {
+            cwd: gitRoot
+          }, (err: any, stdout: string, stderr: string) => {
+            if (err) {
+              reject(new Error(`Git show failed: ${stderr}`));
+              return;
+            }
+            resolve(stdout);
+          });
+        });
+
+        if (!result) {
+          throw new Error('Could not get requested version of the file');
+        }
+
+        for (const webviewPanel of this.webviews.get(document.uri)) {
+          this.postMessage(webviewPanel, 'requestComparisonContent', { content: result });
+        }
+      } catch (error) {
+        this.log.appendLine(`Error loading comparison version: ${error}`);
+        this.log.show(true);
+      }
+      return;
     }
   }
 }

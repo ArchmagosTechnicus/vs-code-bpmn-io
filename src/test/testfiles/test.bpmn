@@ -6,13 +6,18 @@
     </bpmn:startEvent>
     <bpmn:task id="Activity_1te6lr4">
       <bpmn:incoming>Flow_0bc5tzd</bpmn:incoming>
-      <bpmn:outgoing>Flow_0e0wqwm</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1pjcpu8</bpmn:outgoing>
     </bpmn:task>
     <bpmn:sequenceFlow id="Flow_0bc5tzd" sourceRef="StartEvent_1" targetRef="Activity_1te6lr4" />
     <bpmn:endEvent id="Event_1rvlc1z">
-      <bpmn:incoming>Flow_0e0wqwm</bpmn:incoming>
+      <bpmn:incoming>Flow_1rr8c7j</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0e0wqwm" sourceRef="Activity_1te6lr4" targetRef="Event_1rvlc1z" />
+    <bpmn:task id="Activity_16re5vh">
+      <bpmn:incoming>Flow_1pjcpu8</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rr8c7j</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1pjcpu8" sourceRef="Activity_1te6lr4" targetRef="Activity_16re5vh" />
+    <bpmn:sequenceFlow id="Flow_1rr8c7j" sourceRef="Activity_16re5vh" targetRef="Event_1rvlc1z" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
@@ -23,15 +28,22 @@
         <dc:Bounds x="310" y="180" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1rvlc1z_di" bpmnElement="Event_1rvlc1z">
-        <dc:Bounds x="462" y="202" width="36" height="36" />
+        <dc:Bounds x="592" y="202" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_16re5vh_di" bpmnElement="Activity_16re5vh">
+        <dc:Bounds x="460" y="180" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0bc5tzd_di" bpmnElement="Flow_0bc5tzd">
         <di:waypoint x="258" y="220" />
         <di:waypoint x="310" y="220" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0e0wqwm_di" bpmnElement="Flow_0e0wqwm">
+      <bpmndi:BPMNEdge id="Flow_1pjcpu8_di" bpmnElement="Flow_1pjcpu8">
         <di:waypoint x="410" y="220" />
-        <di:waypoint x="462" y="220" />
+        <di:waypoint x="460" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rr8c7j_di" bpmnElement="Flow_1rr8c7j">
+        <di:waypoint x="560" y="220" />
+        <di:waypoint x="592" y="220" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
