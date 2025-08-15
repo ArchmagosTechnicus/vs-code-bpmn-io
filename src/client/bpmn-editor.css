@@ -32,6 +32,23 @@ body {
   background: var(--vscode-button-hoverBackground);
 }
 
+.toolbar select {
+  margin-left: 10px;
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+  border: 1px solid var(--vscode-dropdown-border);
+  padding: 4px 8px;
+  border-radius: 2px;
+}
+
+.toolbar select.hidden {
+  display: none;
+}
+
+.toolbar select:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+}
+
 .diff-container {
   display: flex;
   width: 100%;
@@ -74,7 +91,6 @@ body {
 }
 
 /* Diff view highlighting */
-/* General elements (tasks, events, gateways) */
 .highlight-removed .djs-visual > * {
   fill: rgba(255, 0, 0, 0.2) !important;
   stroke: rgb(255, 0, 0) !important;
@@ -91,27 +107,6 @@ body {
 }
 
 .highlight-layout .djs-visual > * {
-  fill: rgba(0, 0, 255, 0.2) !important;
-  stroke: rgb(0, 0, 255) !important;
-}
-
-/* Diff view highlighting */
-.highlight-removed .djs-visual > :nth-child(1) {
-  fill: rgba(255, 0, 0, 0.2) !important;
-  stroke: rgb(255, 0, 0) !important;
-}
-
-.highlight-added .djs-visual > :nth-child(1) {
-  fill: rgba(0, 255, 0, 0.2) !important;
-  stroke: rgb(0, 255, 0) !important;
-}
-
-.highlight-changed .djs-visual > :nth-child(1) {
-  fill: rgba(255, 165, 0, 0.2) !important;
-  stroke: rgb(255, 165, 0) !important;
-}
-
-.highlight-layout .djs-visual > :nth-child(1) {
   fill: rgba(0, 0, 255, 0.2) !important;
   stroke: rgb(0, 0, 255) !important;
 }
