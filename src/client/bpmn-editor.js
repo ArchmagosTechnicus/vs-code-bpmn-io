@@ -158,7 +158,7 @@ document.getElementById('toggle-diff').addEventListener('click', async () => {
   
   const canvas2 = document.getElementById('canvas2');
   const divider = document.querySelector('.divider');
-  const commitSelector = document.getElementById('commit-selector');
+  const commitSelectorContainer = document.getElementById('commit-selector-container');
   
   if (isDiffMode) {
     // Switch to viewer mode for left panel
@@ -173,7 +173,7 @@ document.getElementById('toggle-diff').addEventListener('click', async () => {
     
     canvas2.classList.remove('hidden');
     divider.classList.remove('hidden');
-    commitSelector.classList.remove('hidden');
+    commitSelectorContainer.classList.remove('hidden');
     
     // Request commit list when entering diff mode
     vscode.postMessage({ type: 'requestCommitList' });
@@ -195,7 +195,7 @@ document.getElementById('toggle-diff').addEventListener('click', async () => {
     await switchLeftPanel(false);
     canvas2.classList.add('hidden');
     divider.classList.add('hidden');
-    commitSelector.classList.add('hidden');
+    commitSelectorContainer.classList.add('hidden');
   }
 });
 
