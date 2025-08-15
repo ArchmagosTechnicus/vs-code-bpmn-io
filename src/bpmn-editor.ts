@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { Disposable, disposeAll } from './dispose';
-import { getNonce } from './util';
+import { Disposable, disposeAll } from './dispose.js';
+import { getNonce } from './util.js';
 
 /**
  * Define the type of edits used in paw draw files.
@@ -497,7 +497,13 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
         <title>BPMN Editor</title>
       </head>
       <body>
-        <div id="canvas"></div>
+        <div class="toolbar">
+          <button id="toggle-diff">Toggle Diff View</button>
+        </div>
+        <div class="diff-container">
+          <div class="viewer" id="canvas"></div>
+          <div class="viewer hidden" id="canvas2"></div>
+        </div>
 
         <script nonce="${nonce}" src="${scriptUri}"></script>
       </body>
@@ -518,13 +524,12 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
     panel.webview.postMessage({ type, body });
   }
 
-  private onMessage(document: BpmnDocument, message: any) {
+  private async onMessage(document: BpmnDocument, message: any) {
     switch (message.type) {
     case 'change':
       return document.makeEdit(message as BpmnEdit);
 
     case 'import':
-
       if (message.error) {
         this.log.appendLine(`${document.uri.fsPath} - ${message.error}`);
       }
@@ -548,6 +553,19 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
       vscode.commands.executeCommand('setContext', 'bpmn-io.bpmnEditor.canvasFocused', message.value);
       return;
 
+    case 'requestComparisonContent':
+      try {
+        const currentDir = vscode.Uri.joinPath(document.uri, '..');
+        const comparisonUri = vscode.Uri.joinPath(currentDir, 'test2.bpmn');
+        const comparisonContent = await readFile(comparisonUri);
+        for (const webviewPanel of this.webviews.get(document.uri)) {
+          this.postMessage(webviewPanel, 'requestComparisonContent', { content: comparisonContent });
+        }
+      } catch (error) {
+        this.log.appendLine(`Error loading comparison diagram: ${error}`);
+        this.log.show(true);
+      }
+      return;
     }
   }
 }
