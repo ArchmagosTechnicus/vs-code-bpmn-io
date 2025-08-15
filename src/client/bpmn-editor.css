@@ -56,17 +56,37 @@ body {
 }
 
 .diff-container .viewer {
-  width: 50%;
+  flex: 1;
   height: 100%;
   position: relative;
+  min-width: 100px;
 }
 
 .diff-container .viewer.hidden {
   display: none;
 }
 
-.diff-container .viewer:not(:last-child) {
-  border-right: 1px solid var(--vscode-panel-border);
+.diff-container .divider {
+  width: 4px;
+  background: var(--vscode-panel-border);
+  cursor: col-resize;
+  margin: 0 -2px;
+  z-index: 100;
+}
+
+.diff-container .divider:hover,
+.diff-container .divider.dragging {
+  background: var(--vscode-focusBorder);
+}
+
+.diff-container .divider.hidden {
+  display: none;
+}
+
+/* Prevent text selection while resizing */
+.diff-container.resizing {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 #canvas {
