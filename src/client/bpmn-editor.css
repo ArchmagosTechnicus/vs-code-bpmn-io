@@ -17,6 +17,24 @@ body {
   border: 1px solid var(--vscode-panel-border);
   border-radius: 3px;
   padding: 5px;
+  display: flex;
+  align-items: center;
+}
+
+#commit-selector-container {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+}
+
+#commit-selector-container.hidden {
+  display: none;
+}
+
+#commit-selector-container label {
+  margin-right: 5px;
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
 }
 
 .toolbar button {
@@ -33,16 +51,11 @@ body {
 }
 
 .toolbar select {
-  margin-left: 10px;
   background: var(--vscode-dropdown-background);
   color: var(--vscode-dropdown-foreground);
   border: 1px solid var(--vscode-dropdown-border);
   padding: 4px 8px;
   border-radius: 2px;
-}
-
-.toolbar select.hidden {
-  display: none;
 }
 
 .toolbar select:focus {

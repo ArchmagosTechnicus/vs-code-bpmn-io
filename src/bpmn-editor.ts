@@ -499,9 +499,12 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
       <body>
         <div class="toolbar">
           <button id="toggle-diff">Toggle Diff View</button>
-          <select id="commit-selector" class="hidden">
-            <option value="HEAD">Current Commit</option>
-          </select>
+          <div id="commit-selector-container" class="hidden">
+            <label for="commit-selector">Compare with:</label>
+            <select id="commit-selector">
+              <option value="HEAD">Current Commit</option>
+            </select>
+          </div>
         </div>
         <div class="diff-container">
           <div class="viewer" id="canvas"></div>
