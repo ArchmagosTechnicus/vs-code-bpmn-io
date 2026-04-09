@@ -32,9 +32,3 @@ RUN npm ci --ignore-scripts
 
 # Copy the rest of the source code
 COPY --chown=node:node . .
-
-# Build the extension
-RUN npm run compile
-
-# Default command (can be overridden)
-CMD ["npm", "run", "test"]
