@@ -24,6 +24,10 @@ const BROKEN_TEST_FILE = vscode.Uri.file(
   path.join(__dirname, '..', 'fixtures', 'broken.bpmn')
 );
 
+const TEST_BPMN_FILE = vscode.Uri.file(
+  path.join(__dirname, '..', 'fixtures', 'test.bpmn')
+);
+
 
 describe('extension', function() {
   this.timeout(5000);
@@ -80,6 +84,18 @@ describe('extension', function() {
 
       // then
       const extension = await getExtension(BROKEN_TEST_FILE);
+
+      expect(extension, 'editor open').to.exist;
+    });
+
+
+    it('should open test BPMN file', async () => {
+
+      // when
+      await vscode.commands.executeCommand('vscode.open', TEST_BPMN_FILE);
+
+      // then
+      const extension = await getExtension(TEST_BPMN_FILE);
 
       expect(extension, 'editor open').to.exist;
     });
