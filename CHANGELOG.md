@@ -6,6 +6,10 @@ All notable changes to the [bpmn.io vs-code extension](https://github.com/bpmn-i
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.18.1 (2026-04-09)
+
+**Full Changelog**: https://github.com/ArchmagosTechnicus/vs-code-bpmn-io/commits/v0.18.1
+
 ## 0.22.2 (2025-07-04)
 
 ## What's Changed
