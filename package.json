@@ -21,9 +21,6 @@
   "keywords": [
     "bpmn"
   ],
-  "activationEvents": [
-    "onCommand:extension.bpmn-io.edit"
-  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
