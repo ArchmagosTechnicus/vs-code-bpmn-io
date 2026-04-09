@@ -61,11 +61,11 @@ async function switchLeftPanel(useViewer) {
   const currentXML = await (useViewer ? modeler : leftViewer).saveXML();
   modeler.detach();
   leftViewer.detach();
-  
+
   const activeEditor = useViewer ? leftViewer : modeler;
   activeEditor.attachTo('#canvas');
   await activeEditor.importXML(currentXML.xml);
-  
+
   // Restore focus handling
   if (!useViewer) {
     activeEditor.on('canvas.focus.changed', (event) => {
@@ -87,6 +87,7 @@ modeler.on('import.done', event => {
 });
 
 modeler.on('commandStack.changed', () => {
+
   /**
    * @type { import('diagram-js/lib/command/CommandStack').default }
    */
@@ -116,7 +117,7 @@ function initResizableSplitView() {
     isResizing = true;
     startX = e.pageX;
     startWidth = document.getElementById('canvas').offsetWidth;
-    
+
     diffContainer.classList.add('resizing');
     divider.classList.add('dragging');
   });
@@ -128,10 +129,10 @@ function initResizableSplitView() {
     const canvas2 = document.getElementById('canvas2');
     const containerWidth = diffContainer.offsetWidth;
     const delta = e.pageX - startX;
-    
+
     // Calculate new width as a percentage
     const newWidth = ((startWidth + delta) / containerWidth * 100);
-    
+
     // Limit the minimum and maximum sizes (10% - 90%)
     if (newWidth >= 10 && newWidth <= 90) {
       canvas.style.flex = 'none';
@@ -146,7 +147,7 @@ function initResizableSplitView() {
       isResizing = false;
       diffContainer.classList.remove('resizing');
       divider.classList.remove('dragging');
-      
+
       // Trigger resize event for bpmn-js to update its viewport
       window.dispatchEvent(new Event('resize'));
     }
@@ -155,32 +156,33 @@ function initResizableSplitView() {
 
 document.getElementById('toggle-diff').addEventListener('click', async () => {
   isDiffMode = !isDiffMode;
-  
+
   const canvas2 = document.getElementById('canvas2');
   const divider = document.querySelector('.divider');
   const commitSelectorContainer = document.getElementById('commit-selector-container');
-  
+
   if (isDiffMode) {
+
     // Switch to viewer mode for left panel
     await switchLeftPanel(true);
-    
+
     // Reset flex layout
     const canvas = document.getElementById('canvas');
     canvas.style.flex = '1';
     canvas.style.width = '';
     canvas2.style.flex = '1';
     canvas2.style.width = '';
-    
+
     canvas2.classList.remove('hidden');
     divider.classList.remove('hidden');
     commitSelectorContainer.classList.remove('hidden');
-    
+
     // Request commit list when entering diff mode
     vscode.postMessage({ type: 'requestCommitList' });
-    
+
     // Start synchronizing viewers
     startSync();
-    
+
     if (!comparisonContent) {
       vscode.postMessage({ type: 'requestComparisonContent' });
     } else {
@@ -188,6 +190,7 @@ document.getElementById('toggle-diff').addEventListener('click', async () => {
       highlightDifferences();
     }
   } else {
+
     // Stop synchronizing viewers
     stopSync();
 
@@ -202,7 +205,7 @@ document.getElementById('toggle-diff').addEventListener('click', async () => {
 // Handle commit selection changes
 document.getElementById('commit-selector').addEventListener('change', (event) => {
   const selectedCommit = event.target.value;
-  vscode.postMessage({ 
+  vscode.postMessage({
     type: 'requestComparisonContent',
     commit: selectedCommit
   });
@@ -214,10 +217,12 @@ const HighlightType = {
   REMOVED: 'removed',
   CHANGED: 'changed',
   LAYOUT: 'layout',
+
   // Get all defined highlight types
   getAll() {
     return Object.values(this).filter(value => typeof value === 'string');
   },
+
   // Convert type to CSS class name
   toClassName(type) {
     return `highlight-${type}`;
@@ -227,12 +232,12 @@ const HighlightType = {
 async function highlightDifferences() {
   const currentXml = await leftViewer.saveXML();
   const comparisonXml = await rightViewer.saveXML();
-  
+
   // Clear all existing highlights from both viewers
-  [leftViewer, rightViewer].forEach(viewer => {
+  [ leftViewer, rightViewer ].forEach(viewer => {
     const canvas = viewer.get('canvas');
     const elementRegistry = viewer.get('elementRegistry');
-    
+
     // Remove all highlight classes from all elements
     elementRegistry.forEach(element => {
       HighlightType.getAll().forEach(type => {
@@ -245,16 +250,16 @@ async function highlightDifferences() {
   const moddle = new BpmnModdle();
   const { rootElement: currentDefinitions } = await moddle.fromXML(currentXml.xml);
   const { rootElement: comparisonDefinitions } = await moddle.fromXML(comparisonXml.xml);
-  
+
   // Get changes using bpmn-js-differ
   const changes = diff(comparisonDefinitions, currentDefinitions);
-  
+
   console.log('Diff changes:', {
     added: Object.keys(changes._added),
     removed: Object.keys(changes._removed),
     changed: Object.keys(changes._changed),
     layoutChanged: Object.keys(changes._layoutChanged)
-  });  // Helper function to log and add markers
+  }); // Helper function to log and add markers
   const addMarkers = (viewer, changes, type) => {
     const canvas = viewer.get('canvas');
     const elementIds = Object.keys(changes);
@@ -263,7 +268,7 @@ async function highlightDifferences() {
       return { id, found: !!element };
     });
     console.log(`Elements to highlight as ${type}:`, elements);
-    
+
     // Add marker to each element individually
     elementIds.forEach(id => {
       const element = viewer.get('elementRegistry').get(id);
@@ -274,13 +279,13 @@ async function highlightDifferences() {
   };
 
   // Highlight changes in the left viewer (current version)
-  addMarkers(leftViewer, changes._added, HighlightType.ADDED);        // Show new elements in green
-  addMarkers(leftViewer, changes._changed, HighlightType.CHANGED);    // Show modified elements in orange
+  addMarkers(leftViewer, changes._added, HighlightType.ADDED); // Show new elements in green
+  addMarkers(leftViewer, changes._changed, HighlightType.CHANGED); // Show modified elements in orange
   addMarkers(leftViewer, changes._layoutChanged, HighlightType.LAYOUT); // Show layout changes in blue
 
   // Highlight changes in the right viewer (comparison version)
-  addMarkers(rightViewer, changes._removed, HighlightType.REMOVED);   // Show removed elements in red
-  addMarkers(rightViewer, changes._changed, HighlightType.CHANGED);   // Show modified elements in orange
+  addMarkers(rightViewer, changes._removed, HighlightType.REMOVED); // Show removed elements in red
+  addMarkers(rightViewer, changes._changed, HighlightType.CHANGED); // Show modified elements in orange
   addMarkers(rightViewer, changes._layoutChanged, HighlightType.LAYOUT); // Show layout changes in blue
 }
 
@@ -361,15 +366,16 @@ window.addEventListener('message', async (event) => {
     modeler.get('canvas').focus();
     return;
 
-  case 'updateCommitList':
+  case 'updateCommitList': {
     const selector = document.getElementById('commit-selector');
     selector.innerHTML = '';
 
     if (body.hasChanges) {
+
       // If there are unstaged changes, compare with HEAD
       selector.innerHTML += '<option value="HEAD">Current Commit (HEAD)</option>';
     }
-    
+
     // Add all commits to the selector
     body.commits.forEach(commit => {
       const option = document.createElement('option');
@@ -381,6 +387,7 @@ window.addEventListener('message', async (event) => {
       selector.appendChild(option);
     });
     return;
+  }
 
   case 'requestComparisonContent':
     comparisonContent = body.content;

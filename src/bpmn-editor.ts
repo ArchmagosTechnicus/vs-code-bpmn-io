@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import { exec } from 'child_process';
+import * as path from 'path';
 import { Disposable, disposeAll } from './dispose.js';
 import { getNonce } from './util.js';
 
@@ -562,14 +564,12 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
 
     case 'requestCommitList':
       try {
-        const cp = require('child_process');
-        const path = require('path');
         const filePath = document.uri.fsPath;
         const fileDir = path.dirname(filePath);
 
         // First, find the git root directory
         const gitRoot = await new Promise<string>((resolve, reject) => {
-          cp.exec('git rev-parse --show-toplevel', {
+          exec('git rev-parse --show-toplevel', {
             cwd: fileDir
           }, (err: any, stdout: string, stderr: string) => {
             if (err) {
@@ -581,8 +581,8 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
         });
 
         // Get list of commits that modified this file
-        const commits = await new Promise<Array<{hash: string, date: string}>>((resolve, reject) => {
-          cp.exec(`git log --pretty=format:"%h|%ad" --date=format:"%Y-%m-%d %H:%M" -- "${path.relative(gitRoot, filePath)}"`, {
+        const commits = await new Promise<Array<{ hash: string, date: string }>>((resolve, reject) => {
+          exec(`git log --pretty=format:"%h|%ad" --date=format:"%Y-%m-%d %H:%M" -- "${path.relative(gitRoot, filePath)}"`, {
             cwd: gitRoot
           }, (err: any, stdout: string, stderr: string) => {
             if (err) {
@@ -592,7 +592,7 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
             const commits = stdout.split('\n')
               .filter(line => line.trim())
               .map(line => {
-                const [hash, date] = line.split('|');
+                const [ hash, date ] = line.split('|');
                 return { hash, date };
               });
             resolve(commits);
@@ -600,8 +600,8 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
         });
 
         // Check if there are unstaged changes
-        const hasChanges = await new Promise<boolean>((resolve, reject) => {
-          cp.exec(`git diff --quiet "${path.relative(gitRoot, filePath)}"`, {
+        const hasChanges = await new Promise<boolean>(resolve => {
+          exec(`git diff --quiet "${path.relative(gitRoot, filePath)}"`, {
             cwd: gitRoot
           }, (err: any) => {
             resolve(!!err); // If there's an error, it means there are changes
@@ -609,7 +609,7 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
         });
 
         for (const webviewPanel of this.webviews.get(document.uri)) {
-          this.postMessage(webviewPanel, 'updateCommitList', { 
+          this.postMessage(webviewPanel, 'updateCommitList', {
             commits,
             hasChanges
           });
@@ -622,8 +622,6 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
 
     case 'requestComparisonContent':
       try {
-        const cp = require('child_process');
-        const path = require('path');
         const filePath = document.uri.fsPath;
         const fileDir = path.dirname(filePath);
 
@@ -632,7 +630,7 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
 
         // First, find the git root directory
         const gitRoot = await new Promise<string>((resolve, reject) => {
-          cp.exec('git rev-parse --show-toplevel', {
+          exec('git rev-parse --show-toplevel', {
             cwd: fileDir
           }, (err: any, stdout: string, stderr: string) => {
             if (err) {
@@ -645,10 +643,10 @@ export class BpmnEditor implements vscode.CustomEditorProvider<BpmnDocument> {
 
         // Get the file path relative to git root
         const relativePath = path.relative(gitRoot, filePath);
-        
+
         // Run git show to get the requested version
         const result = await new Promise<string>((resolve, reject) => {
-          cp.exec(`git show ${requestedCommit}:${relativePath}`, {
+          exec(`git show ${requestedCommit}:${relativePath}`, {
             cwd: gitRoot
           }, (err: any, stdout: string, stderr: string) => {
             if (err) {
