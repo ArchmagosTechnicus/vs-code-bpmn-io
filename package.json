@@ -138,6 +138,7 @@
     "bpmn-js": "^18.1.2",
     "bpmn-js-color-picker": "^0.7.1",
     "bpmn-js-differ": "^3.0.2",
-    "bpmn-js-token-simulation": "^0.38.1"
+    "bpmn-js-token-simulation": "^0.38.1",
+    "ids": "^1.0.0"
   }
 }
