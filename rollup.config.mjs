@@ -5,6 +5,30 @@ import typescript from '@rollup/plugin-typescript';
 
 import css from 'rollup-plugin-css-only';
 
+const appExternal = [ 'vscode' ];
+
+const appPlugins = [
+  typescript(),
+  resolve(),
+  commonjs()
+];
+
+function appBuild(input, file) {
+  return {
+    input,
+    output: {
+      sourcemap: true,
+      format: 'commonjs',
+      file
+    },
+    external: appExternal,
+    plugins: appPlugins,
+    watch: {
+      clearScreen: false
+    }
+  };
+}
+
 export default [
 
   // client
@@ -32,21 +56,14 @@ export default [
   },
 
   // app
-  {
-    input: 'src/extension.ts',
-    output: {
-      sourcemap: true,
-      format: 'commonjs',
-      file: './out/extension.js'
-    },
-    external: [ 'vscode' ],
-    plugins: [
-      typescript(),
-      resolve(),
-      commonjs()
-    ],
-    watch: {
-      clearScreen: false
-    }
-  }
+  appBuild('src/dispose.ts', './out/dispose.js'),
+
+  // app
+  appBuild('src/util.ts', './out/util.js'),
+
+  // app
+  appBuild('src/bpmn-editor.ts', './out/bpmn-editor.js'),
+
+  // app
+  appBuild('src/extension.ts', './out/extension.js')
 ];
