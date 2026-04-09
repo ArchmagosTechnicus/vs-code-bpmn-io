@@ -14,7 +14,7 @@
         "--disable-extensions",
         "--disable-gpu",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "${workspaceFolder}/src/test/testfiles/test.bpmn"
+        "${workspaceFolder}/src/test/fixtures/test.bpmn"
       ],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "npm: compile"
