@@ -12,5 +12,6 @@
 		},
 		"ghcr.io/devcontainers/features/git:1": {}
 	},
+	"remoteUser": "node",
 	"postCreateCommand": "npm ci && npm run compile"
 }
